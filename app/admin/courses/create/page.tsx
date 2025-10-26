@@ -183,7 +183,7 @@ export default function AdminCreateCoursePage() {
                                 <FormItem className="w-full">
                                     <FormLabel>Thumbnail image</FormLabel>
                                     <FormControl>
-                                        <Uploader />
+                                        <Uploader onChange={field.onChange} value={field.value} />
                                         {/*<Input placeholder="thumbnail url"
                                         {...field} />*/}
                                     </FormControl>
