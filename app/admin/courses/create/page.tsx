@@ -2,7 +2,7 @@
 "use client"
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, PlusIcon, SparkleIcon } from "lucide-react";
+import { ArrowLeft, Loader2, PlusIcon, SparkleIcon } from "lucide-react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -14,10 +14,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RichTextEditor } from "@/components/rich-text-editor/Editor";
 import { Uploader } from "@/components/file-uploader/Uploader";
+import { courseSchema, CourseSchemaType } from "@/lib/zodSchemas";
+import { courseLevels } from "@/lib/zodSchemas";
+import { courseStatus } from "@/lib/zodSchemas";
+import { useTransition } from "react";
+import { tryCatch } from "@/hooks/try-catch";
+import { CreateCourse } from "./actions";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-export const courseLevels = ["beginner", "Intermediate", "Advanced"] as const;
-export const courseStatus = ["draft", "published", "archived"] as const;
-export type CourseSchemaType = z.infer<typeof formSchema>;
 
 export const courseCategories= [
     "Development",
@@ -39,52 +44,48 @@ export const courseCategories= [
 ] as const;
 
 
-const formSchema = z.object({
-        title: z.string().min(3,{
-            message: "Title must be at least 3 characters long"}).max(100, {
-                message: "Title must be at most 100 characters long"}),
-        description: z.string().min(10, {
-            message: "Description must be at least 10 characters long"}),
-        fileKey: z.string().min(1,{
-            message: "File key is required"}),
-        price: z.string().min(1, 
-            {message: "Price must be at least 1"}),
-        duration: z.string().min(1, {
-            message: "Duration must be at least 1 hour"}).max(500),
-        level: z.enum(courseLevels, {message: "Level is required"}),
-        category: z.enum(courseCategories, {message: "Category is required"}),
-        smallDescription: z.string().min(10, {
-            message: "Small Description must be at least 3 characters long"}).max(200, {
-                message: "Small Description must be at most 200 characters long"}),
-        slug: z.string().min(3, {
-            message: "Slug must be at least 3 characters long"}).max(100, {
-                message: "Slug must be at most 100 characters long"}),
-        status: z.enum(courseStatus, {
-            message: "Status is required"}),
-    });
 
 export default function AdminCreateCoursePage() {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+
+    const [isPending, startTransition] = useTransition();
+
+    const router = useRouter();
+
+
+  const form = useForm<z.infer<typeof courseSchema>>({
+    resolver: zodResolver(courseSchema) as any,
     defaultValues: {
       title: "",
       description: "",
       fileKey: "",
-      price: "",
-      duration: "",
-      level: "beginner",
+      price: 0,
+      duration: 0,
+      level: "Beginner",
       category: "Development",
       smallDescription: "",
       slug: "",
-      status: "draft",
+      status: "Draft",
     },
   })
 
 
+  function onSubmit(values: CourseSchemaType) {
+    startTransition(async () => {
+        const { data: result, error } = await tryCatch(CreateCourse(values));
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
+        if (error) {
+            toast.error("An unexpected error occured.Please try again.")
+            return;
+        }
+
+        if (result.status === "success"){
+            toast.success(result.message);
+            form.reset();
+            router.push("/admin/courses");
+        } else if (result.status === "error") {
+            toast.error(result.message)
+        }
+    })
     console.log(values)
   }
 
@@ -304,8 +305,18 @@ export default function AdminCreateCoursePage() {
                             )}
                         />
 
-                    <Button>
-                        Create Course <PlusIcon className="ml-1" size={16} />
+                    <Button type="submit" disabled={isPending}>
+                        {isPending ? (
+                            <>
+                            Creating...
+                            <Loader2 className="ml-1 animate-spin"  />
+                            </>
+                        ) : (
+                            <>
+                            Create Course <PlusIcon className="ml-1 " size={16}/>
+                            </>
+                        )
+                        }
                     </Button>
                     </form>
   

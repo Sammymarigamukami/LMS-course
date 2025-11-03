@@ -81,7 +81,7 @@ export function Uploader({value, onChange}: iAppProps) {
                     setFileState((prev) => ({
                     ...prev,
                     progress: Math.round(percentageCompleted)
-                }));
+                    }));
                     }
                 }
 
