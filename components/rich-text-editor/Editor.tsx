@@ -3,7 +3,6 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Menubar } from './Menubar';
 import TextAlign from '@tiptap/extension-text-align';
-import { useEffect, useState } from 'react';
 
 export function RichTextEditor({field}:{ field: any }) {
     const editor = useEditor({

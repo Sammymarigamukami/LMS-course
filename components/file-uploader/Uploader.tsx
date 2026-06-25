@@ -220,7 +220,6 @@ export function Uploader({value, onChange}: iAppProps) {
     }
 
 
-
     function rejectedFiles(fileRejection: FileRejection[]) {
         if(fileRejection.length) {
             const tooManyFiles = fileRejection.find((rejection)=> rejection.errors[0].code === 'too-many-files');
@@ -254,6 +253,7 @@ export function Uploader({value, onChange}: iAppProps) {
         return <RenderEmptyState isDragActive={isDragActive} />;
     }
 
+    // Cleanup object URL when component unmounts or when a new file is selected
     useEffect(() => {
         return () => {
                     if (fileState.objectUrl && !fileState.objectUrl.startsWith("http")) {

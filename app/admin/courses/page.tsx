@@ -1,7 +1,9 @@
+import { adminGetCourse } from "@/app/data/admin/admin-get-course";
 import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 
-export default function CoursesPage() {
+export default async function CoursesPage() {
+    const data = await adminGetCourse();
     return (
         <>
             <div className="flex items-center justify-between">
@@ -11,7 +13,9 @@ export default function CoursesPage() {
             </div>
 
             <div>
-                <h1>Here you will see all of the courses</h1>
+                {data.map((course) => (
+                    <p key={course.id}>{course.title}</p>
+                ))}
             </div>
         </>
     )

@@ -1,5 +1,4 @@
-// lib/prisma.ts
-
+// lib/db.ts
 
 import { PrismaClient } from "./generated/prisma";
 
